@@ -1,79 +1,61 @@
 //require node modules
 var http = require('http'),
-fs = require('fs'),
 request = require('request'),
+fs = require('fs'),
 jade = require('jade');
 
 
-// request('http://swapi.co/api/people', function (err, res, body) {
-//   if (!err && res.statusCode == 200) {
-
-//     var swapi = JSON.parse(body);
-
-//     http.createServer(function (req, res) {
-
-//       if (req.url == '/') {
-//         fs.readFile('./template.html', function(err, data) {
-//           if (err) {
-//               console.err(err);
-//               res.end('Server err');
-//           } else {
-//               var tmpl = data.toString();
-
-//               var makeLi = (function () {
-//                 var cont = 0,
-//                 result = swapi.results,
-//                 resultLength = result.length,
-//                 tpl = [];
-
-//                 for (; cont < resultLength; cont++) {
-//                   tpl.push(result[cont].name);
-//                 	var html = tpl.join('</li><li>');
-//                 }
-
-//                 res.writeHead(200, {'Content-Type': 'text/html'});
-//                 res.end(html);
-//               }());
-//           } 
-//         });
-//       }
-//     }).listen(8000, "127.0.0.1");
-//   } else {
-//     console.log('server error');
-//   }
-// });
-
-
-var server = http.createServer(function (req, res) {}).listen(8000, '127.0.0.1', function (err) {
+// Server initialization...
+http.createServer(function (req, res) {
+	request('http://swapi.co/api/people/', function (error, response, body) {
+		resCheck(res, 'getApi');
+		getTpl(JSON.parse(body), res);
+	});
+}).listen(8000, '127.0.0.1', function (err, res) {
 	if(err) return handleError(err, res);
 });
 
-function requestApi(res) {
-	request('http://swapi.co/api/people', function (err, response, body, res) {
-		console.log('line 55 : ' + res);
-		getTemplate(err, JSON.parse(body.toString()), res);
-	});
-}
+// Gets the data from the API...
+// function getApi(err, res) {}
 
-function getTemplate(err, titles, res) {
-	fs.readFile('./template.html', 'utf8', function (err, data, res) {
-		if (err) handleError(err, data);
-		console.log('line 63 : ' + res);
+// gets html template file...
+function getTpl(titles, res) {
+	fs.readFile('./template.html', 'utf8', function (err, data) {
+		if (err) return handleError(err, data);
 		formatHTML(titles, data.toString(), res);
-	});
+	})
 }
 
-function formatHTML (titles, tmpl, res) {
-	var arr = [];
-	for (var prop in titles) {
-		arr.push(titles[prop]);
-	}
-	var html = tmpl.replace('%', arr.join('</li><li>'));
+function formatHTML(titles, tmpl, res) {
+	resCheck(res, 'formatHTML');
+
+	var cont = 0,
+    result = titles.results,
+    resultLength = result.length,
+	tpl = [];
+
+    for (; cont < resultLength; cont++) {
+      tpl.push(result[cont].name);
+    	var html = tpl.join('</li><li>');
+    }
+
 	res.writeHead(200, {'content-Type' : 'text/html'});
 	res.end(html);
 }
 
+// Checks res state...
+function resCheck(res, functionName){
+	if (res !== undefined) {
+		var error = console.log('----res Good  ' + functionName);
+	} else {
+		var error = console.log('----res Error  ' + functionName);
+	}
+	return error;
+}
+
+// Error handler function...
 function handleError(err, res) {
 	console.log(err);
-	res.end('Server error');
+	res.end('Server Error');
+	resCheck(res, 'handleError');
 }
