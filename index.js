@@ -1,9 +1,8 @@
 //require node modules
 var http = require('http'),
-request = require('request'),
 fs = require('fs'),
+request = require('request'),
 jade = require('jade');
-
 
 // Server initialization...
 http.createServer(function (req, res) {
@@ -26,6 +25,7 @@ function getTpl(titles, res) {
 	})
 }
 
+// injects content in the html template
 function formatHTML(titles, tmpl, res) {
 	resCheck(res, 'formatHTML');
 
@@ -44,7 +44,7 @@ function formatHTML(titles, tmpl, res) {
 }
 
 // Checks res state...
-function resCheck(res, functionName){
+function resCheck(res, functionName) {
 	if (res !== undefined) {
 		var error = console.log('----res Good  ' + functionName);
 	} else {
@@ -57,5 +57,4 @@ function resCheck(res, functionName){
 function handleError(err, res) {
 	console.log(err);
 	res.end('Server Error');
-	resCheck(res, 'handleError');
 }
